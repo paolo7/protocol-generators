@@ -16,18 +16,21 @@ From these datasets, we extract a subset of articles we are interested in using 
  This script is run with the following configuration:
  ```
 list_of_allowed_languages = ["en","es"]
-list_of_allowed_categories = ["http://es.wikihow.com/Categor%C3%ADa:Desayunos","http://www.wikihow.com/Category:Breakfast" 
+list_of_allowed_categories = ["http://es.wikihow.com/Categor%C3%ADa:Desayunos","http://www.wikihow.com/Category:Breakfast" # 468
                               ,"http://www.wikihow.com/Category:Recipes","http://es.wikihow.com/Categor%C3%ADa:Recetas" # 15681
                               ,"http://es.wikihow.com/Categor%C3%ADa:Recetas-para-dietas-especiales","http://www.wikihow.com/Category:Specialty-Diet-Recipes"
-                              ,"http://www.wikihow.com/Category:Food-Preparation","http://www.wikihow.com/Category:Food-Preparation"    
-                                                                                                                                        
+                              ,"http://www.wikihow.com/Category:Food-Preparation","http://www.wikihow.com/Category:Food-Preparation" # 16733
+                              ,"http://www.wikihow.com/Category:Cooking-for-Children"
+                              ,"http://www.wikihow.com/Category:Drinks","http://es.wikihow.com/Categor%C3%ADa:Bebidas"
+                              ,"http://www.wikihow.com/Category:Holiday-Cooking","http://es.wikihow.com/Categor%C3%ADa:Comidas-festivas"
+                              ,"http://www.wikihow.com/Category:Party-Snacks","http://es.wikihow.com/Categor%C3%ADa:Bocadillos-para-fiestas"
                                ]
 perform_sparql_filtering = True
 remove_multiple_methods = True
 remove_multiple_requirements = True
-min_number_of_steps = 5
+min_number_of_steps = 4
 max_number_of_steps = 20
-min_number_of_requirements = 5
+min_number_of_requirements = 4
 max_number_of_requirements = 20
 owl_sameAs_required_prefixes = [["http://es.wikihow.com/","http://www.wikihow.com/"]]
 save_simplified = True
