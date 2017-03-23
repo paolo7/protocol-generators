@@ -55,16 +55,16 @@ The `dependency_extractor.py` is run and the following files are generated:
 
  ## Results in Numbers
  
-The original datasets were around 240.000 instructions, 120.000 each per language
+- The original datasets has 254.349 instructions, about 120.000 each per language
 
 Data Filtering
- - In the selected category there were 16733
- - After the filtering we got 3893
- - Of those there are 1811 pairs of English-Spanish versions of the same set of instructions
+ - In the selected category there were 21.635 (91.4% loss from dataset)
+ - After the filtering we got 5.867 (72.8% loss from previous step)
+ - Of those there are 2887 pairs of English-Spanish versions of the same set of instructions (1.5% loss from previous step)
 
 Protocol Generator
- - Then we filter out those pairs that do not have exactly the same number of steps and requirements, losing 343 pairs
+ - Then we filter out those pairs that do not have exactly the same number of steps and requirements, losing ??? pairs
  - Then the Protocol Generator tries to assign each requirement to the first steps that requires it, to generate a more interesting graph 
  - The Protocol Generator deletes those graphs that are not isomorphic, as we want exactly similar protocols
  - The Protocol Generator deletes those graphs that have less than 5 requirements assigned to tasks further than the first one
- - Finally we get 513 pairs of instructions/protocols
+ - Finally we get ??? pairs of instructions/protocols
