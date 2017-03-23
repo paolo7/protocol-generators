@@ -8,6 +8,10 @@ from bs4 import BeautifulSoup
 simple_i_dict = {}
 index = 0
 
+
+graph_name = "http://localhost:8890/Collaboration"
+graph_name = "http://localhost:8890/CollaborationExtended"
+
 def simplify_dict(uri):
     global index
     if not uri in simple_i_dict:
@@ -27,7 +31,7 @@ prefixes = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 num = 0
 sparql.setQuery(prefixes+"""
     SELECT DISTINCT ?pair1 ?pair2
-    FROM <http://localhost:8890/Collaboration>
+    FROM <"""+graph_name+""">
     WHERE {
         ?pair1 owl:sameAs ?same .
         ?pair1 prohow:language prohow:language_code_en .
@@ -48,7 +52,7 @@ def same_num_rel(en_uri,es_uri,rel):
     num_es = -1
     sparql.setQuery(prefixes + """
             SELECT (COUNT(distinct ?s) AS ?no)
-            FROM <http://localhost:8890/Collaboration>
+            FROM <"""+graph_name+""">
             WHERE {
                 <""" + en_uri + """> prohow:"""+rel+""" ?s
              }
@@ -58,7 +62,7 @@ def same_num_rel(en_uri,es_uri,rel):
         num_en = result["no"]["value"]
     sparql.setQuery(prefixes + """
                 SELECT (COUNT(distinct ?s) AS ?no)
-                FROM <http://localhost:8890/Collaboration>
+                FROM <"""+graph_name+""">
                 WHERE {
                     <""" + es_uri + """> prohow:"""+rel+""" ?s
                  }
@@ -138,7 +142,7 @@ def array_inclusion(small,big):
             best_score = score
     return best_score
 
-def process_data(printout,en_uri,es_uri,en_label,es_label,req_en,req_es,step_en,step_es,step_en_a,step_es_a,dep_en,dep_es,ordered_steps_en,ordered_steps_es):
+def process_data(printout,en_uri,es_uri,en_label,es_label,req_en,req_es,type_req_en,type_req_es,step_en,step_es,step_en_a,step_es_a,dep_en,dep_es,ordered_steps_en,ordered_steps_es):
     print en_uri + " : " + en_label
     printout = False
     if printout:
@@ -294,7 +298,7 @@ def process_data(printout,en_uri,es_uri,en_label,es_label,req_en,req_es,step_en,
         print " no match, too few requirements assigned to steps: "+str(postponed)
         return False
     print "FOUND A MATCH "+str(postponed)
-    save_pair(dep_en_tot,dep_es_tot,en_uri,es_uri,en_label,es_label,req_en,req_es,step_en,step_es,step_en_a,step_es_a,dep_en,dep_es,ordered_steps_en,ordered_steps_es)
+    save_pair(dep_en_tot,dep_es_tot,en_uri,es_uri,en_label,es_label,req_en,req_es,type_req_en,type_req_es,step_en,step_es,step_en_a,step_es_a,dep_en,dep_es,ordered_steps_en,ordered_steps_es)
     return True
 
 simple_i_dictionary = {}
@@ -310,29 +314,47 @@ def geti(uri):
 
 index_pairs = 0
 
-def save_pair(dep_en_tot,dep_es_tot,en_uri,es_uri,en_label,es_label,req_en,req_es,step_en,step_es,step_en_a,step_es_a,dep_en,dep_es,ordered_steps_en,ordered_steps_es):
+def save_pair(dep_en_tot,dep_es_tot,en_uri,es_uri,en_label,es_label,req_en,req_es,type_req_en,type_req_es,step_en,step_es,step_en_a,step_es_a,dep_en,dep_es,ordered_steps_en,ordered_steps_es):
     global index_pairs
     out_label = codecs.open('all_labels.txt', 'a', "utf-8")
     #out_abstracts = open('all_abstracts.txt', 'a')
     out_dependencies = codecs.open('all_dependencies.txt', 'a', "utf-8")
     out_turtle= codecs.open('all_turtle.txt', 'a', "utf-8")
     title_both = "\n#PROTOCOLPAIR[" + str(index_pairs) + "]"+"\n"
-    title_en = "#PAIR[" + str(index_pairs) + "] " + en_uri + " # " + en_label + "\n"
-    title_es = "#PAIR[" + str(index_pairs) + "] " + es_uri + " # " + es_label+"\n"
+    title_en = "#PAIR[" + str(index_pairs) + "] " + en_uri + " # " + en_label + "\n#steps:"+str(len(step_en))\
+               +";req:"+str(len(req_en))+";dep:"+str(len(dep_en_tot))+";distinctReq:"\
+                +str("http://w3id.org/prohow#requirement" in type_req_en.values() and "http://w3id.org/prohow#consumable" in type_req_en.values())+";\n"
+    title_es = "#PAIR[" + str(index_pairs) + "] " + es_uri + " # " + es_label+"\n#steps:"+str(len(step_es))\
+               +";req:"+str(len(req_es))+";dep:"+str(len(dep_es_tot))+";distinctReq:"+ \
+               str("http://w3id.org/prohow#requirement" in type_req_es.values() and "http://w3id.org/prohow#consumable" in type_req_es.values())+";\n"
     index_pairs += 1
 
     # write the label file
     out_label.write(title_both)
     out_label.write(title_en)
     for s in step_en:
-        out_label.write(geti(s) + " "+(step_en[s]+" "+step_en_a[s].strip())+"\n")
+        out_label.write("st "+geti(s) + " "+(step_en[s]+" "+step_en_a[s].strip())+"\n")
     for s in req_en:
-        out_label.write(geti(s) + " "+req_en[s]+"\n")
+        type = "re "
+        if "http://w3id.org/prohow#requirement" in type_req_en.values() and "http://w3id.org/prohow#consumable" in type_req_en.values():
+            if s in type_req_en:
+                if type_req_en[s] == "http://w3id.org/prohow#requirement":
+                    type = "nc "
+                if type_req_en[s] == "http://w3id.org/prohow#consumable":
+                    type = "co "
+        out_label.write(type+geti(s) + " "+req_en[s]+"\n")
     out_label.write(title_es)
     for s in step_es:
-        out_label.write(geti(s) + " "+(step_es[s]+" "+step_es_a[s].strip())+"\n")
+        out_label.write("st "+geti(s) + " "+(step_es[s]+" "+step_es_a[s].strip())+"\n")
     for s in req_es:
-        out_label.write(geti(s) + " "+req_es[s]+"\n")
+        type = "re "
+        if "http://w3id.org/prohow#requirement" in type_req_es.values() and "http://w3id.org/prohow#consumable" in type_req_es.values():
+            if s in type_req_es:
+                if type_req_es[s] == "http://w3id.org/prohow#requirement":
+                    type = "nc "
+                if type_req_es[s] == "http://w3id.org/prohow#consumable":
+                    type = "co "
+        out_label.write(type+geti(s) + " "+req_es[s]+"\n")
     # write the dependency file
     out_dependencies.write(title_both)
     out_dependencies.write(title_en)
@@ -349,7 +371,14 @@ def save_pair(dep_en_tot,dep_es_tot,en_uri,es_uri,en_label,es_label,req_en,req_e
     for s in step_en:
         out_turtle.write(":"+geti(s) + " :label \"\"\""+(step_en[s]+" "+step_en_a[s].strip())+"\"\"\" . \n")
     for s in req_en:
+        #type = "re"
+        #if s in type_req_en:
+        #    if type_req_en[s] == "http://w3id.org/prohow#requirement":
+        #        type = "nc"
+        #    if type_req_en[s] == "http://w3id.org/prohow#consumable":
+        #        type = "co"
         out_turtle.write(":"+geti(s) + " :label \"\"\""+req_en[s]+"\"\"\" . \n")
+        #out_turtle.write(":" + geti(s) + " :type :"+type+" \n")
     for d in dep_en_tot:
         for d1 in dep_en_tot[d]:
             out_turtle.write(":"+geti(d1) + " :next :" + geti(d) + " . \n")
@@ -357,7 +386,14 @@ def save_pair(dep_en_tot,dep_es_tot,en_uri,es_uri,en_label,es_label,req_en,req_e
     for s in step_es:
         out_turtle.write(":"+geti(s) + " :label \"\"\""+(step_es[s]+" "+step_es_a[s].strip())+"\"\"\" . \n")
     for s in req_es:
+        #type = "re"
+        #if s in type_req_es:
+        #    if type_req_es[s] == "http://w3id.org/prohow#requirement":
+        #        type = "nc"
+        #    if type_req_es[s] == "http://w3id.org/prohow#consumable":
+        #        type = "co"
         out_turtle.write(":"+geti(s) + " :label \"\"\""+req_es[s]+"\"\"\" . \n")
+        #out_turtle.write(":" + geti(s) + " :type :" + type + " \n")
     for d in dep_es_tot:
         for d1 in dep_es_tot[d]:
             out_turtle.write(":"+geti(d1) + " :next :" + geti(d) + " . \n")
@@ -377,6 +413,8 @@ def process_pair(en_uri,es_uri):
     title_es = ""
     req_en = {}
     req_es = {}
+    type_req_en = {}
+    type_req_es = {}
     step_en = {}
     step_es = {}
     step_en_a = {}
@@ -385,7 +423,7 @@ def process_pair(en_uri,es_uri):
     dep_es = {}
     sparql.setQuery(prefixes + """
                     SELECT ?label
-                    FROM <http://localhost:8890/Collaboration>
+                    FROM <"""+graph_name+""">
                     WHERE {
                         <""" + en_uri + """> rdfs:label ?label
                      }
@@ -396,7 +434,7 @@ def process_pair(en_uri,es_uri):
     #
     sparql.setQuery(prefixes + """
                     SELECT ?label
-                    FROM <http://localhost:8890/Collaboration>
+                    FROM <"""+graph_name+""">
                     WHERE {
                         <""" + es_uri + """> rdfs:label ?label
                      }
@@ -406,30 +444,40 @@ def process_pair(en_uri,es_uri):
         title_es = result["label"]["value"]
     #
     sparql.setQuery(prefixes + """
-                    SELECT ?uri ?label
-                    FROM <http://localhost:8890/Collaboration>
+                    SELECT ?uri ?label ?type
+                    FROM <"""+graph_name+""">
                     WHERE {
                         <""" + en_uri + """> prohow:requires ?uri .
                         ?uri rdfs:label ?label
+                        OPTIONAL {
+                            ?uri rdf:type ?type .
+                        }
                      }""")
     results = sparql.query().convert()
     for result in results["results"]["bindings"]:
         req_en[result["uri"]["value"]] = result["label"]["value"]
+        if "type" in result and not result["type"]["value"] is None:
+            type_req_en[result["uri"]["value"]] = result["type"]["value"]
     #
     sparql.setQuery(prefixes + """
-                    SELECT ?uri ?label
-                    FROM <http://localhost:8890/Collaboration>
+                    SELECT ?uri ?label ?type
+                    FROM <"""+graph_name+""">
                     WHERE {
                         <""" + es_uri + """> prohow:requires ?uri .
                         ?uri rdfs:label ?label
+                    OPTIONAL {
+                        ?uri rdf:type ?type .
+                    }
                      }""")
     results = sparql.query().convert()
     for result in results["results"]["bindings"]:
         req_es[result["uri"]["value"]] = result["label"]["value"]
+        if "type" in result and not result["type"]["value"] is None:
+            type_req_es[result["uri"]["value"]] = result["type"]["value"]
     #
     sparql.setQuery(prefixes + """
                     SELECT ?uri ?label ?abstract
-                    FROM <http://localhost:8890/Collaboration>
+                    FROM <"""+graph_name+""">
                     WHERE {
                         <""" + en_uri + """> prohow:has_step ?uri .
                         ?uri rdfs:label ?label .
@@ -443,7 +491,7 @@ def process_pair(en_uri,es_uri):
     #
     sparql.setQuery(prefixes + """
                     SELECT ?uri ?label ?abstract
-                    FROM <http://localhost:8890/Collaboration>
+                    FROM <"""+graph_name+""">
                     WHERE {
                         <""" + es_uri + """> prohow:has_step ?uri .
                         ?uri rdfs:label ?label .
@@ -457,7 +505,7 @@ def process_pair(en_uri,es_uri):
     #
     sparql.setQuery(prefixes + """
                     SELECT ?sa ?sb
-                    FROM <http://localhost:8890/Collaboration>
+                    FROM <"""+graph_name+""">
                     WHERE {
                         <""" + en_uri + """> prohow:has_step ?sa .
                         <""" + en_uri + """> prohow:has_step ?sb .
@@ -469,7 +517,7 @@ def process_pair(en_uri,es_uri):
     #
     sparql.setQuery(prefixes + """
                         SELECT ?sa ?sb
-                        FROM <http://localhost:8890/Collaboration>
+                        FROM <"""+graph_name+""">
                         WHERE {
                             <""" + es_uri + """> prohow:has_step ?sa .
                             <""" + es_uri + """> prohow:has_step ?sb .
@@ -525,7 +573,7 @@ def process_pair(en_uri,es_uri):
         simplify_dict(s)
     for s in req_es:
         simplify_dict(s)
-    process_data(True,en_uri,es_uri,title_en,title_es,req_en,req_es,step_en,step_es,step_en_a,step_es_a,dep_en,dep_es,ordered_steps_en,ordered_steps_es)
+    process_data(True,en_uri,es_uri,title_en,title_es,req_en,req_es,type_req_en,type_req_es,step_en,step_es,step_en_a,step_es_a,dep_en,dep_es,ordered_steps_en,ordered_steps_es)
 
 for result in results["results"]["bindings"]:
     process_pair(result["pair1"]["value"],result["pair2"]["value"])
