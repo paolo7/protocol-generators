@@ -8,7 +8,7 @@ To run this experiment, download the following versions of the PROHOW dataset:
 
 You will need a triplestore which exposes a SPARQL endpoint, like the one offered by Virtuoso OpenLink
 
-## Data Filtering
+### Data Filtering
  
 From these datasets, we extract a subset of articles we are interested in using this tool:
  - [PROHOW extractor script](https://github.com/paolo7/extractor-script)
@@ -38,11 +38,11 @@ concatenate_label_abstract = False
 parse_html_into_text = True
  ```
  
-## Triplestore Creation
+### Triplestore Creation
 
 The simplified triples extracted in the previous phase are loaded in triplesotre (I used Virtuoso).
 
-## Protocol Generator
+### Protocol Generator
 
 The protocol `dependency_extractor.py` is configured to access the dataset at the given enpoint (`http://localhost:8890/sparql/` by default).
 
@@ -53,7 +53,7 @@ The `dependency_extractor.py` is run and the following files are generated:
  - `all_turtle` the same as the previous ones, but in valid RDF Turtle format (just add a random prefix for `:`, like the line: `PREFIX : <http://e.c>`
 
 
- ## Results in Numbers
+ ### Results in Numbers
  
 - The original datasets has 254.349 instructions, about 120.000 each per language
 
@@ -68,3 +68,23 @@ Protocol Generator
  - The Protocol Generator deletes those graphs that are not isomorphic, as we want exactly similar protocols
  - The Protocol Generator deletes those graphs that have less than 5 requirements assigned to tasks further than the first one
  - Finally we get 679 pairs of instructions/protocols (71% loss from previous step, 0.5% of the original set)
+
+## Label Simplification
+
+The `label_converter.py` script takes a file called `labels.txt` and transforms it into another one called `labels_converted.txt` where all the labels have been modified by another script. 
+
+The external script, such as `simple_label_parser.py`, can be called by this function, which knows about the language and type of the label to convert:
+
+```
+# Tags: type_tag
+# st : step
+# re : requirement
+# co : requirement consumable, usually ingredient
+# nc : requirement non-consumable, usually a tool
+# Tags: language_tag
+# en : English
+# es : Spanish
+
+process_label(language_tag,type_tag,label):
+  ...
+```
