@@ -63,8 +63,8 @@ Data Filtering
  - Of those there are 2887 pairs of English-Spanish versions of the same set of instructions (1.5% loss from previous step)
 
 Protocol Generator
- - Then we filter out those pairs that do not have exactly the same number of steps and requirements, losing ??? pairs
+ - Then we filter out those pairs that do not have exactly the same number of steps and requirements, losing 538 pairs (18.6% loss from previous step)
  - Then the Protocol Generator tries to assign each requirement to the first steps that requires it, to generate a more interesting graph 
  - The Protocol Generator deletes those graphs that are not isomorphic, as we want exactly similar protocols
  - The Protocol Generator deletes those graphs that have less than 5 requirements assigned to tasks further than the first one
- - Finally we get ??? pairs of instructions/protocols
+ - Finally we get 679 pairs of instructions/protocols (71% loss from previous step, 0.5% of the original set)
