@@ -95,8 +95,12 @@ def basic_match(l1,l2):
         #print l1o
         #print l2o
         return True
-    l1m2 = re.sub('[\W_]+', '', l1m)
-    l2m = re.sub('[\W_]+', '', l2)
+    l1m2 = re.sub(r'([&#199;&#209;]|_)+', ' ', l1m)
+    l1m2 = ''.join([i for i in l1m2 if not i.isdigit()])
+    l1m2 = re.sub(' +', ' ', l1m2).strip()
+    l2m = re.sub(r'([&#199;&#209;]|_)+', ' ', l2)
+    l2m = ''.join([i for i in l2m if not i.isdigit()])
+    l2m = re.sub(' +', ' ', l2m).strip()
     if l1m2 in l2m:
         #print l1o
         #print l2o
@@ -332,8 +336,9 @@ def save_pair(dep_en_tot,dep_es_tot,en_uri,es_uri,en_label,es_label,req_en,req_e
     # write the label file
     out_label.write(title_both)
     out_label.write(title_en)
+    language_tag = "en "
     for s in step_en:
-        out_label.write("st "+geti(s) + " "+(step_en[s]+" "+step_en_a[s].strip())+"\n")
+        out_label.write(language_tag+"st "+geti(s) + " "+(step_en[s]+" "+step_en_a[s].strip())+"\n")
     for s in req_en:
         type = "re "
         if "http://w3id.org/prohow#requirement" in type_req_en.values() and "http://w3id.org/prohow#consumable" in type_req_en.values():
@@ -342,10 +347,11 @@ def save_pair(dep_en_tot,dep_es_tot,en_uri,es_uri,en_label,es_label,req_en,req_e
                     type = "nc "
                 if type_req_en[s] == "http://w3id.org/prohow#consumable":
                     type = "co "
-        out_label.write(type+geti(s) + " "+req_en[s]+"\n")
+        out_label.write(language_tag+type+geti(s) + " "+req_en[s]+"\n")
     out_label.write(title_es)
+    language_tag = "es "
     for s in step_es:
-        out_label.write("st "+geti(s) + " "+(step_es[s]+" "+step_es_a[s].strip())+"\n")
+        out_label.write(language_tag+"st "+geti(s) + " "+(step_es[s]+" "+step_es_a[s].strip())+"\n")
     for s in req_es:
         type = "re "
         if "http://w3id.org/prohow#requirement" in type_req_es.values() and "http://w3id.org/prohow#consumable" in type_req_es.values():
@@ -354,7 +360,7 @@ def save_pair(dep_en_tot,dep_es_tot,en_uri,es_uri,en_label,es_label,req_en,req_e
                     type = "nc "
                 if type_req_es[s] == "http://w3id.org/prohow#consumable":
                     type = "co "
-        out_label.write(type+geti(s) + " "+req_es[s]+"\n")
+        out_label.write(language_tag+type+geti(s) + " "+req_es[s]+"\n")
     # write the dependency file
     out_dependencies.write(title_both)
     out_dependencies.write(title_en)
